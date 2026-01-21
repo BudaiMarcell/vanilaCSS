@@ -1,596 +1,502 @@
-/* Alapstílusok */
-:root{
+/* =====================
+   ROOT VARIABLES
+===================== */
+
+:root {
     --main-color: #abf0ff;
     --secondary-color: #c6fbff;
     --mid-color: #99c4ce;
     --light-gray: #6b8e8f;
-    --gray: #384949;
+    --dark-gray: #384949;
+}
+
+/* =====================
+   RESET & BASE
+===================== */
+
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--main-color);
-    color: var(--gray);
+    color: var(--dark-gray);
+
+    animation: pageFadeIn 0.6s ease forwards;
+    animation-delay: .3s;
+    opacity: 0;
 }
 
-nav {
-    background-color: var(--secondary-color);
-    color: var(--gray-);
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 60px;
-    position: relative;
-    z-index: 2;
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* =====================
+   PURE CSS LOADER
+===================== */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--main-color);
+    z-index: 9999;
+
+    display: grid;
+    place-items: center;
+
+    animation: loaderFadeOut 0.7s ease forwards;
+    animation-delay: .3s;
+}
+
+body::after {
+    content: "";
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+
+    border: 6px solid var(--secondary-color);
+    border-top-color: var(--dark-gray);
+
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    animation:
+        spin 0.7s linear infinite,
+        loaderFadeOut .6s ease forwards;
+    animation-delay: 0s, .3s;
+
+    z-index: 10000;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes loaderFadeOut {
+    to {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* =====================
+   PAGE ENTER
+===================== */
+
+@keyframes pageFadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* =====================
+   NAVBAR
+===================== */
+
+.navbar-wrapper {
+    position: fixed;
+    top: 15px;
+    width: 100%;
+    z-index: 100;
 }
 
 .navbar {
-    pointer-events: auto;
-
     max-width: 1500px;
     margin: 0 auto;
     padding: 0 24px;
 
     height: 60px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
 
-    background-color: var(--gray) !important;
     background: rgba(198, 251, 255, 0.85);
     border-radius: 16px;
+    backdrop-filter: blur(8px);
 
-    box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.22);
 
-    backdrop-filter: blur(8px); /* opcionális, modern hatás */
-
-    color: var(--main-color);
+    animation: slideDown 0.6s ease forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
 }
 
-.navbar-wrapper {
-    position: fixed;        /* lebeg */
-    top: 15px;
-    width: 100%;
-    z-index: 100;
-    pointer-events: none;   /* csak a navbar legyen kattintható */
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
-    letter-spacing: 1px;
 }
 
-/* A menü listája */
 .nav-links {
     list-style: none;
     display: flex;
-    margin: 0;
-    padding: 0;
+    gap: 20px;
 }
 
-.nav-links li {
-    padding: 0 15px;
+/* =====================
+   MAIN LAYOUT
+===================== */
+
+.main-container,
+.page-container {
+    padding-top: 120px;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-inline: 20px;
 }
 
-.nav-links a {
-    color: var(--gray-);
-    text-decoration: none;
-    transition: color 0.3s;
-    position: relative;
-}
-
-.nav-links a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 0;
-    height: 2px;
-    background: var(--main-color);
-    transition: width .3s;
-}
-
-.nav-links a:hover::after {
-    width: 100%;
-}
-
-.nav-links a:hover {
-    color: var(--secondary-color);
-}
-
-/* A Checkbox Hack lelke: rejtett checkbox */
-#nav-check {
-    display: none;
-}
-
-/* Hamburger ikon konténer (alapértelmezetten rejtve) */
-.nav-btn {
-    display: none;
-}
-
-/* Reszponzív beállítások mobilszámára */
-@media (max-width: 768px) {
-    .nav-btn {
-        display: inline-block;
-        cursor: pointer;
-    }
-
-    /* Hamburger ikon rajzolása CSS-szel */
-    .nav-btn label {
-        display: inline-block;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-    }
-
-    .nav-btn label span {
-        display: block;
-        width: 25px;
-        height: 3px;
-        background-color: var(--gray-);
-        margin: 5px 0;
-        transition: 0.3s;
-    }
-
-    /* A menü listájának átalakítása mobil nézetre */
-    .nav-links {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        right: 0;
-
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-
-        background-color: var(--secondary-color);
-        border-radius: 0 0 16px 16px;
-
-        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    }
-
-    .nav-links li {
-        width: 100%;
-        padding: 15px 20px;
-        border-top: 1px solid #444;
-    }
-
-    /* Amikor a checkbox be van pipálva (le van nyitva a menü) */
-    #nav-check:checked ~ .nav-links {
-        height: calc(100vh - 60px);
-        overflow-y: auto;
-    }
-
-    /* Opcionális: Hamburger ikon animálása (X alak) */
-    #nav-check:checked ~ .nav-btn label span:nth-child(1) {
-        transform: translateY(8px) rotate(45deg);
-    }
-    #nav-check:checked ~ .nav-btn label span:nth-child(2) {
-        opacity: 0;
-    }
-    #nav-check:checked ~ .nav-btn label span:nth-child(3) {
-        transform: translateY(-8px) rotate(-45deg);
-    }
-}
-
-
- /* -----------------------Grid-------------------------- */
+/* =====================
+   LANDING GRID
+===================== */
 
 .grid-container {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    transition: all 0.4s ease;
+    gap: 40px;
+    justify-items: center;
 }
 
-.grid-container .card:hover {
-    filter: brightness(1);
-    opacity: 1;
-    transform: scale(1.01);
-    z-index: 2;
+/* Ha valamelyik card hoverelt */
+.grid-container:has(.card:hover) .card:not(:hover) {
+    opacity: 0.45;
+    filter: grayscale(20%);
+    transform: scale(0.96);
 }
 
-.main-container {
-    padding-top: 100px;
+@media (min-width: 768px) {
+    .grid-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
-.landing_images{
-    max-width: 35%;
-    border: var(--gray) 3px solid;
+/* =====================
+   LANDING CARDS
+===================== */
+
+.card {
+    position: relative;
+    isolation: isolate;
+}
+
+.card:hover img {
+    transform: scale(1.06);
+    filter: brightness(1.05);
+}
+
+.card:hover::before {
+    opacity: 0.85;
+    filter: blur(8px);
+}
+
+.card:nth-child(1) { animation-delay: .3s; }
+.card:nth-child(2) { animation-delay: .3s; }
+.card:nth-child(3) { animation-delay: .3s; }
+
+@keyframes riseUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =====================
+   RESPONSIVE CIRCULAR IMAGES
+===================== */
+
+.card img {
+    width: clamp(220px, 34vw, 320px);
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+
     border-radius: 50%;
-    transition: transform 0.4s ease;
-    cursor: pointer;
     position: relative;
     z-index: 1;
+
+    /* hely a gyűrűnek */
+    padding: 3px;
+    background: var(--main-color);
+
+    transition: transform 0.4s ease, filter 0.4s ease;
 }
 
-.card:hover .landing_images {
-    transform: scale(1.05);
-}
-
-/* .card::before {
+.card img::before {
     content: "";
     position: absolute;
-    inset: -12px;
-
+    inset: 0;
     border-radius: 50%;
 
     background: conic-gradient(
         from 0deg,
-        #38bdf8,
-        #22c55e,
-        #eab308,
-        #38bdf8
+        var(--mid-color),
+        var(--secondary-color),
+        var(--light-gray),
+        var(--mid-color)
     );
 
-    animation: spin 6s linear infinite;
+    /* vékony gyűrű */
+    -webkit-mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 2px),
+            #000 calc(100% - 1px)
+        );
+    mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 2px),
+            #000 calc(100% - 1px)
+        );
 
-    filter: blur(3px);
+    animation: ringSpin 14s linear infinite;
     opacity: 0.8;
-    z-index: 0;
-} */
 
-/* .card::after {
-    content: "";
-    position: absolute;
-    inset: 8px;
-    background: var(--main-color);
-    border-radius: 50%;
-    z-index: 0;
-} */
-
-.landing_images::before {
-    content: "";
-    position: absolute;
-    inset: -12px;
-
-    border-radius: 50%;
-
-    background: conic-gradient(
-        from 0deg,
-        #38bdf8,
-        #22c55e,
-        #eab308,
-        #38bdf8
-    );
-
-    animation: spin 6s linear infinite;
-
-    filter: blur(3px);
-    opacity: 0.8;
     z-index: -1;
 }
 
-.landing_images::after {
-    content: "";
-    position: absolute;
-    inset: 6px;
-
-    background: var(--main-color);
-    border-radius: 50%;
-    z-index: -1;
-}
-
-
-@keyframes spin {
+@keyframes ringSpin {
     to {
         transform: rotate(360deg);
     }
 }
 
-@media (min-width: 360px) {
-    .grid-container {
-        grid-template-columns: repeat(1, 1fr);
-        grid-template-rows: auto auto;
-    }
+.card:hover img {
+    transform: scale(1.06);
+}
 
-    .landing_images{
-        max-width: 65%;
+.card:hover img::before {
+    opacity: 1;
+}
+
+/* =====================
+   PAGE CONTENT ANIMATION
+===================== */
+
+h1, h2, h3,
+.product-card,
+.pricing-card,
+.team-member {
+    animation: contentSlide 0.8s ease forwards;
+    opacity: 0;
+}
+
+h1 { animation-delay: .3s; }
+h2 { animation-delay: .3s; }
+h3 { animation-delay: .3s; }
+
+.product-card,
+.pricing-card,
+.team-member {
+    animation-delay: .3s;
+}
+
+@keyframes contentSlide {
+    from {
+        transform: translateY(25px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
     }
 }
 
-@media (min-width: 768px) {
+/* =====================
+   CARDS (GENERIC)
+===================== */
 
-    .grid-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .landing_images{
-        max-width: 90%;
-    }
+.product-card,
+.pricing-card,
+.team-member {
+    background: rgba(255,255,255,0.6);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.card{
+/* =====================
+   GRIDS
+===================== */
+
+.product-list,
+.pricing-cards,
+.team-section {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* =====================
+   HAPPY CUSTOMERS
+===================== */
+
+.customer-section {
+    margin-top: 50px;
     text-align: center;
-    position: relative;
-    width: fit-content;
-    margin: 0 auto;
 
-    transition: 
-        transform 0.4s ease,
-        filter 0.4s ease,
-        opacity 0.4s ease;
+    animation: contentSlide 0.6s ease forwards;
+    animation-delay: 0.3s;
+    opacity: 0;
 }
 
-
-.buy-btn {
-    margin-top: 12px;
-    padding: 10px 22px;
-
-    background: linear-gradient(135deg, var(--light-gray), var(--gray));
-    color: var(--secondary-color);
-
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-
-    border: none;
-    border-radius: 999px;
-
-    cursor: pointer;
-
-    box-shadow:
-        0 6px 18px rgba(56, 189, 248, 0.35);
-
-    transition: all 0.25s ease;
+.customer-title {
+    font-size: 2.2rem;
+    margin-bottom: 25px;
 }
 
-.buy-btn:hover {
-    transform: translateY(-2px);
-    box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.24);
+.customer-counter {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 30px 50px;
+    border-radius: 20px;
+
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(8px);
+
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
-.buy-btn:active {
-    transform: translateY(0);
-    box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.24);
-}
+/* =====================
+   CSS COUNTER MAGIC
+===================== */
 
-
-
-/* -----------------Grid vége------------------- */
-
-
-
-/* --------------------Landing page----------------------- */
-
-
-
-@property --num {
-    syntax: '<integer>';
+@property --count {
+    syntax: "<integer>";
     initial-value: 0;
     inherits: false;
 }
 
-.csscounter {
-    font-size: 3rem;
-    font-weight: bold;
-    font-family: sans-serif;
-    animation: count 2s forwards cubic-bezier(0, 0, 0.2, 1);
-    counter-reset: num var(--num);
-    text-align: center;
-    color: var(--gray);
-}
+.counter-number {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--dark-gray);
 
-.csscounter::after {
-    content: counter(num);
-}
-
-@keyframes count {
-    from {
-        --num: 0;
-    }
-
-    to {
-        --num: 777;
-    }
-}
-
-.scroll-down {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-}
-
-.scroll-down span {
-    display: block;
-    width: 18px;
-    height: 18px;
-
-    border-bottom: 3px solid var(--gray);
-    border-right: 3px solid var(--gray);
-
-    transform: rotate(45deg);
-    margin: auto;
-
-    animation: bounce 1.8s infinite;
-    box-shadow: 0 0 12px rgba(255,255,255,.6);
-}
-
-.scroll-down.double span:nth-child(2) {
-    margin-top: -6px;
+    counter-reset: num var(--count);
+    animation: countUp 1.4s ease-out forwards;
     animation-delay: .3s;
 }
 
-
-
-@keyframes bounce {
-    0% {
-        opacity: 0;
-        transform: rotate(45deg) translate(-5px, -5px);
-    }
-    50% {
-        opacity: 1;
-        transform: rotate(45deg) translate(0, 0);
-    }
-    100% {
-        opacity: 0;
-        transform: rotate(45deg) translate(5px, 5px);
-    }
+.counter-number::after {
+    content: counter(num);
 }
 
-html {
-    scroll-behavior: smooth;
-}
-
-
-/* -------------------Landing page vége------------------------ */
-
-/* -------------------Out Team section------------------------- */
-
-.ourTeamSection{
-    margin-top: 10%;
-    text-align: center;
+.counter-label {
+    margin-top: 8px;
     font-size: 1rem;
+    opacity: 0.7;
 }
 
-.core-values-title {
-    text-align: center;
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin-bottom: 40px;
-    color: var(--gray);
+@keyframes countUp {
+    from {
+        --count: 0;
+    }
+    to {
+        --count: 777;
+    }
 }
 
-.core-values {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px 20px;
+/* =====================
+   FOOTER
+===================== */
 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 24px;
-}
+.site-footer {
+    margin-top: 120px;
+    padding: 60px 20px 40px;
 
-.value-card {
-    background: rgba(255, 255, 255, 0.55);
+    background: rgba(198, 251, 255, 0.7);
     backdrop-filter: blur(10px);
 
-    border-radius: 16px;
-    padding: 24px;
+    box-shadow: 0 -20px 40px rgba(0,0,0,0.15);
 
-    box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.08);
-
-    transition: transform .25s ease, box-shadow .25s ease;
+    animation: footerReveal 0.6s ease forwards;
+    animation-delay: .3s;
+    opacity: 0;
 }
 
-.value-card:hover {
-    transform: translateY(-6px);
-    box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.12);
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+
+    display: grid;
+    gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.value-card h3 {
+/* Brand */
+
+.footer-brand h3 {
+    font-size: 1.6rem;
     margin-bottom: 10px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #0369a1;
 }
 
-.value-card p {
+.footer-brand p {
     font-size: 0.95rem;
     line-height: 1.6;
-    color: #334155;
+    opacity: 0.85;
 }
 
+/* Links */
 
-/* ===== POPUP ALAP ===== */
-
-.popup {
-    position: fixed;
-    inset: 0;
-    display: none;
-
-    justify-content: center;
-    align-items: center;
-
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(6px);
-
-    z-index: 999;
+.footer-links h4 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
 }
 
-/* kattintás után jelenik meg */
-.popup:target {
-    display: flex;
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* tartalom doboz */
-.popup-content {
-    display: flex;
-    gap: 40px;
-
-    max-width: 900px;
-    width: 90%;
-
-    padding: 40px;
-    border-radius: 24px;
-
-    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
-
-    animation: popupIn 0.4s ease;
+.footer-links li {
+    margin-bottom: 8px;
 }
 
-/* kép */
-.popup-content img {
-    width: 300px;
-    border-radius: 16px;
+.footer-links a {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
 }
 
-/* szöveg */
-.popup-text h2 {
-    font-size: 2rem;
-    margin-bottom: 16px;
+.footer-links a:hover {
+    opacity: 1;
 }
 
-.popup-text p {
-    font-size: 1.05rem;
-    line-height: 1.6;
+/* Meta */
+
+.footer-meta {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.85rem;
+    opacity: 0.7;
 }
 
-/* bezáró gomb */
-.popup-close {
-    position: absolute;
-    top: 30px;
-    right: 40px;
+/* =====================
+   FOOTER ANIMATION
+===================== */
 
-    font-size: 2.5rem;
-    text-decoration: none;
-    color: white;
-}
-
-/* animáció */
-@keyframes popupIn {
+@keyframes footerReveal {
     from {
-        transform: scale(0.9);
+        transform: translateY(40px);
         opacity: 0;
     }
     to {
-        transform: scale(1);
+        transform: translateY(0);
         opacity: 1;
     }
 }
-
-.popup-blue .popup-content {
-    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-}
-
-.popup-green .popup-content {
-    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-}
-
-.popup-orange .popup-content {
-    background: linear-gradient(135deg, #ffedd5, #fed7aa);
-}
-
