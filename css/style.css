@@ -10,6 +10,10 @@
     --dark-gray: #384949;
 }
 
+@view-transition {
+    navigation: auto;
+}
+
 /* =====================
    RESET & BASE
 ===================== */
@@ -153,6 +157,8 @@ body::after {
     max-width: 1100px;
     margin: 0 auto;
     padding-inline: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 /* =====================
@@ -222,6 +228,18 @@ body::after {
     border-radius: 50%;
 }
 
+.card-image--product {
+    view-transition-name: portal-product;
+}
+
+.card-image--pricing {
+    view-transition-name: portal-pricing;
+}
+
+.card-image--team {
+    view-transition-name: portal-team;
+}
+
 .card-image::before {
     content: "";
     position: absolute;
@@ -261,6 +279,46 @@ body::after {
         opacity: 0.5;
         transform: scale(1);
         box-shadow: 0 0 0 0 rgba(171, 240, 255, 0.55);
+    }
+}
+
+::view-transition-old(portal-product),
+::view-transition-old(portal-pricing),
+::view-transition-old(portal-team) {
+    animation: portalZoomOut 0.6s ease forwards;
+    transform-origin: center;
+}
+
+::view-transition-new(portal-product),
+::view-transition-new(portal-pricing),
+::view-transition-new(portal-team) {
+    animation: portalZoomIn 0.6s ease forwards;
+    transform-origin: center;
+}
+
+@keyframes portalZoomOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(2.6);
+        filter: blur(6px);
+    }
+}
+
+@keyframes portalZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.35);
+        filter: blur(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
     }
 }
 
@@ -332,7 +390,6 @@ h3 { animation-delay: .3s; }
 
     animation: contentSlide 0.6s ease forwards;
     animation-delay: 0.3s;
-    opacity: 0;
 }
 
 .customer-title {
@@ -372,6 +429,33 @@ h3 { animation-delay: .3s; }
     counter-reset: num var(--count);
     animation: countUp 1.4s ease-out forwards;
     animation-delay: .3s;
+    display: inline-block;
+    min-width: 3ch;
+}
+
+.portal-target {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(72vmin, 520px);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(171, 240, 255, 0.35) 0%, rgba(153, 196, 206, 0.15) 55%, rgba(171, 240, 255, 0) 70%);
+    pointer-events: none;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+.portal-target--product {
+    view-transition-name: portal-product;
+}
+
+.portal-target--pricing {
+    view-transition-name: portal-pricing;
+}
+
+.portal-target--team {
+    view-transition-name: portal-team;
 }
 
 .counter-number::after {
