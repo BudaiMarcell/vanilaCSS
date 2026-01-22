@@ -139,6 +139,14 @@ body::after {
 .logo {
     font-size: 1.5rem;
     font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 26px;
+    height: 26px;
 }
 
 .nav-links {
@@ -191,11 +199,21 @@ body::after {
 .card {
     position: relative;
     isolation: isolate;
+    display: grid;
+    gap: 12px;
+    text-align: center;
 }
 
 .card:hover img {
     transform: scale(1.06);
     filter: brightness(1.05);
+}
+
+.heading-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 .card:hover::before {
@@ -283,6 +301,32 @@ body::after {
     z-index: 1;
 
     transition: transform 0.4s ease, filter 0.4s ease;
+}
+
+/* =====================
+   HIGHLIGHT SECTION
+===================== */
+
+.highlight-section {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: 40px 0 10px;
+}
+
+.highlight-card {
+    background: rgba(255,255,255,0.65);
+    border-radius: 18px;
+    padding: 22px;
+    display: grid;
+    gap: 12px;
+    text-align: left;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+}
+
+.highlight-icon {
+    width: 32px;
+    height: 32px;
 }
 
 @keyframes ringPulse {
@@ -609,6 +653,10 @@ h3 { animation-delay: .3s; }
     .card img {
         width: clamp(200px, 70vw, 280px);
     }
+
+    .highlight-card {
+        text-align: center;
+    }
 }
 
 @media (max-width: 520px) {
@@ -670,6 +718,12 @@ h3 { animation-delay: .3s; }
 .customer-title {
     font-size: 2.2rem;
     margin-bottom: 25px;
+}
+
+.customer-illustration {
+    width: min(320px, 80%);
+    margin: 0 auto 24px;
+    display: block;
 }
 
 .customer-counter {
