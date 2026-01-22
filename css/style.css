@@ -529,6 +529,21 @@ h3 { animation-delay: .3s; }
     background: rgba(255,255,255,0.35);
 }
 
+.image-placeholder--filled {
+    border: none;
+    padding: 0;
+    background: transparent;
+    min-height: unset;
+}
+
+.media-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 18px;
+    box-shadow: 0 16px 30px rgba(0,0,0,0.12);
+}
+
 .media-caption {
     font-size: 0.9rem;
     opacity: 0.7;
