@@ -457,9 +457,8 @@ h3 { animation-delay: .3s; }
     gap: 12px;
 }
 
-.image-placeholder {
+.subpage-images {
     border-radius: 18px;
-    border: 2px dashed rgba(56, 73, 73, 0.35);
     min-height: 200px;
     display: grid;
     place-items: center;
@@ -468,6 +467,7 @@ h3 { animation-delay: .3s; }
     letter-spacing: 0.02em;
     color: rgba(56, 73, 73, 0.75);
     background: rgba(255,255,255,0.35);
+    width: clamp(440px, 34vw, 320px);
 }
 
 .media-caption {
