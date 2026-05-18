@@ -1,0 +1,70 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+\fs24
+\b Buttercup Perfumery backend elemz\'e9s \u8211? Word dokumentum v\'e1zlat\b0\par
+\par
+\b Megjegyz\'e9s az adatforr\'e1sr\'f3l\b0\par
+A helyi Windows el\'e9r\'e9si utat (C:\\ParfumProjekt\\beadand\'f3k) ebben a k\'f6rnyezetben nem tudtam el\'e9rni, \par
+\'e9s a megadott GitHub repository kl\'f3noz\'e1sa is h\'e1l\'f3zati korl\'e1t miatt sikertelen volt.\par
+Ez\'e9rt az al\'e1bbi dokumentum egy kit\'f6lthet\'151, backend-f\'f3kusz\'fa strukt\'far\'e1lt sablon.\par
+\par
+\b 1) Funkci\'f3: Bejelentkez\'e9s \u8211? token alap\'fa hiteles\'edt\'e9s\b0\par
+\b Le\'edr\'e1s:\b0  Mutasd be, hogyan j\'f6n l\'e9tre a token (pl. JWT), mely claim-eket tartalmaz, \par
+mennyi a lej\'e1rati ideje, hol t\'f6rt\'e9nik al\'e1\'edr\'e1s/ellen\'151rz\'e9s.\par
+\b F\'e1jlok:\b0  [IDE J\'d6NNEK A PONTOS F\'c1JLNEVEK]\par
+\b Kiemelt k\'f3dr\'e9szlet:\b0\par
+{\f1\fs20 // pl. login controller + token service r\'e9szlete}\par
+\fs24\f0
+\par
+\b 2) Funkci\'f3: Felhaszn\'e1l\'f3 valid\'e1l\'e1s \u8211? middleware/guard\b0\par
+\b Le\'edr\'e1s:\b0  Hogyan vizsg\'e1lja a rendszer a be\'e9rkez\'151 tokent minden v\'e9dett endpointn\'e1l, \par
+mi t\'f6rt\'e9nik hib\'e1s/lej\'e1rt token eset\'e9n.\par
+\b F\'e1jlok:\b0  [AUTH MIDDLEWARE, GUARD, FILTER]\par
+\par
+\b 3) Funkci\'f3: Szerepk\'f6r alap\'fa jogosults\'e1gkezel\'e9s (RBAC)\b0\par
+\b Le\'edr\'e1s:\b0  Admin/User szerepk\'f6r\'f6k, route szint\'171 jogosults\'e1g, tiltott m\'171veletek kezel\'e9se.\par
+\b F\'e1jlok:\b0  [ROLES DECORATOR / AUTHZ SERVICE]\par
+\par
+\b 4) Funkci\'f3: Regisztr\'e1ci\'f3 \u8211? jelsz\'f3 hash-el\'e9s \u00e9s input valid\'e1ci\'f3\b0\par
+\b Le\'edr\'e1s:\b0  Password hash algoritmus (pl. bcrypt/argon2), salt haszn\'e1lat, \par
+email \u00e9s jelsz\'f3 szab\'e1lyok, duplik\'e1lt fi\'f3k kezel\'e9se.\par
+\b F\'e1jlok:\b0  [REGISTER SERVICE + DTO/SCHEMA]\par
+\par
+\b 5) Funkci\'f3: Term\'e9kek (parf\'fcm\'f6k) CRUD \u00e9s admin m\'171veletek\b0\par
+\b Le\'edr\'e1s:\b0  L\'e9trehoz\'e1s, m\'f3dos\'edt\'e1s, t\'f6rl\'e9s, list\'e1z\'e1s; mely endpointok publikusak \u00e9s melyek v\'e9dettek.\par
+\b F\'e1jlok:\b0  [PRODUCT CONTROLLER/SERVICE/MODEL]\par
+\par
+\b 6) Funkci\'f3: Kos\'e1r \u00e9s rendel\'e9s feldolgoz\'e1s\b0\par
+\b Le\'edr\'e1s:\b0  Kos\'e1rt\'e9telek kezel\'e9se, rendel\'e9s lead\'e1s tranzakci\'f3ja, \par
+k\'e9szletellen\'151rz\'e9s, fizet\'e9si st\'e1tusz friss\'edt\'e9s.\par
+\b F\'e1jlok:\b0  [CART + ORDER MODULE]\par
+\par
+\b 7) Funkci\'f3: Hibakezel\'e9s \u00e9s API v\'e1laszstrukt\'fara\b0\par
+\b Le\'edr\'e1s:\b0  K\'f6zponti exception handler, egys\'e9ges JSON v\'e1laszform\'e1tum, hibak\'f3dok.\par
+\b F\'e1jlok:\b0  [ERROR HANDLER / FILTER / MIDDLEWARE]\par
+\par
+\b 8) Funkci\'f3: Adatb\'e1zis kapcsolat \u00e9s entit\'e1s modellek\b0\par
+\b Le\'edr\'e1s:\b0  ORM/ODM konfigur\'e1ci\'f3, migr\'e1ci\'f3k, indexek, kapcsolatok (1-N, N-N), \par
+lusta/eager bet\'f6lt\'e9s, teljes\'edtm\'e9ny szempontok.\par
+\b F\'e1jlok:\b0  [DB CONFIG + ENTITY/MODEL FILES]\par
+\par
+\b 9) Funkci\'f3: Napl\'f3z\'e1s \u00e9s audit\b0\par
+\b Le\'edr\'e1s:\b0  Ki mit m\'f3dos\'edtott, mikor, melyik endpoint h\'edv\'e1ssal; hibalog vs. auditlog sz\'e9tv\'e1laszt\'e1sa.\par
+\b F\'e1jlok:\b0  [LOGGER / AUDIT SERVICE]\par
+\par
+\b 10) Funkci\'f3: Biztons\'e1gi v\'e9delem (rate limit, CORS, input sanitization)\b0\par
+\b Le\'edr\'e1s:\b0  Brute force ellen\'e9s, CORS policy, XSS/SQL injection megel\'151z\'e9s, \par
+HTTP security headerek (pl. Helmet).\par
+\b F\'e1jlok:\b0  [APP BOOTSTRAP / SECURITY MIDDLEWARE]\par
+\par
+\b Javasolt kit\'f6lt\'e9si minta minden ponthoz\b0\par
+- \b Funkci\'f3:\b0  [r\'f6vid n\'e9v]\par
+- \b F\'e1jlok:\b0  [pontos el\'e9r\'e9si utak]\par
+- \b K\'f3dr\'e9szlet:\b0  [10\u8211?30 sor relev\'e1ns k\'f3d]\par
+- \b Magy\'e1rat:\b0  [mit csin\'e1l, milyen input/output, milyen edge case-ek]\par
+- \b Biztons\'e1gi/megb\'edzhat\'f3s\'e1gi megjegyz\'e9s:\b0  [kock\'e1zat + javaslat]\par
+\par
+\b K\'f6vetkez\'151 l\'e9p\'e9s\b0\par
+Ha fel tudod t\'f6lteni a projektet ide (vagy egy zipet), akkor ezt a dokumentumot konkr\'e9t, \par
+f\'e1jlokra \u00e9s val\'f3di k\'f3dr\'e9szletekre szabott, teljes v\'e9gleges verzi\'f3ra cser\'e9lem.\par
+}
