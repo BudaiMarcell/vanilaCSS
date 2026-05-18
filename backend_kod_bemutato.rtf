@@ -1,6 +1,144 @@
 {\rtf1\ansi\deff0
 {\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
 \fs24
+codex/generate-detailed-word-document-of-backend-code-i15u2g
+\b Backend k\'f3d bemutat\'f3 \u8211? r\'e9szletes, funkci\'f3 alap\'fa dokument\'e1ci\'f3\b0\par
+\par
+\b Fontos megjegyz\'e9s\b0\par
+A csatolt ZIP ebben a futtat\'f3k\'f6rnyezetben jelenleg nem l\'e1that\'f3 (nem tal\'e1ltam ZIP f\'e1jlt a munkak\'f6nyvt\'e1rban),\par
+emiatt az al\'e1bbi anyag egy kib\'151v\'edt, azonnal haszn\'e1lhat\'f3 backend sablon. Ha felt\'f6lt\'f6d a ZIP-et ide,\par
+f\'e1jlokra bontva, konkr\'e9t forr\'e1sk\'f3d-r\'e9szletekkel friss\'edtem ugyanezt a dokumentumot.\par
+\par
+\b 1) Funkci\'f3: Bejelentkez\'e9s \u00e9s token alap\'fa hiteles\'edt\'e9s\b0\par
+\b Le\'edr\'e1s:\b0\par
+A bejelentkez\'e9si folyamat c\'e9lja, hogy a felhaszn\'e1l\'f3 azonos\'edt\'e1sa ut\'e1n egy r\'f6vid \u00e9let\'171 access tokent,\par
+valamint ig\'e9ny szerint egy hosszabb \u00e9let\'171 refresh tokent kapjon. A backend tipikusan ellen\'151rzi az email/jelsz\'f3 p\'e1rost,\par
+majd al\'e1\'edrja a tokent szerveroldali titokkal (JWT secret vagy priv\'e1t kulcs). A token tartalmazhat userId-t, szerepk\'f6rt,\par
+a token azonos\'edt\'f3j\'e1t (jti), lej\'e1rati id\'151t \u00e9s ki\'e1ll\'edt\'e1si id\'151t.\par
+\par
+A biztons\'e1gos megval\'f3s\'edt\'e1s kulcsa, hogy a jelsz\'f3 soha ne ker\'fclj\'f6n vissza v\'e1laszban, a token lej\'e1rata r\'f6vid legyen,\par
+\u00e9s a refresh token forgat\'e1sa (rotation) megt\'f6rt\'e9njen. Javasolt az is, hogy a bejelentkez\'e9si esem\'e9nyeket auditlogba\par
+mentsd (IP, user-agent, id\'151pont), hogy incidens eset\'e9n visszak\'f6vethet\'151 legyen a tev\'e9kenys\'e9g.\par
+\b Kiemelt k\'f3dr\'e9szlet (mintak\'f3d):\b0\par
+{\f1\fs20
+async login(dto) {\par
+  const user = await usersRepo.findByEmail(dto.email);\par
+  if (!user) throw new UnauthorizedException('Invalid credentials');\par
+\par
+  const ok = await bcrypt.compare(dto.password, user.passwordHash);\par
+  if (!ok) throw new UnauthorizedException('Invalid credentials');\par
+\par
+  const payload = { sub: user.id, role: user.role, jti: randomUUID() };\par
+  const accessToken = jwt.sign(payload, ACCESS_SECRET, { expiresIn: '15m' });\par
+  const refreshToken = jwt.sign({ sub: user.id }, REFRESH_SECRET, { expiresIn: '30d' });\par
+\par
+  await tokenRepo.storeRefreshHash(user.id, hash(refreshToken));\par
+  return { accessToken, refreshToken, user: { id: user.id, email: user.email, role: user.role } };\par
+}\par
+}\fs24\f0
+\par
+\b 2) Funkci\'f3: Token ellen\'151rz\'e9s v\'e9dett endpointokon (middleware/guard)\b0\par
+\b Le\'edr\'e1s:\b0\par
+A v\'e9dett endpointokra be\'e9rkez\'151 k\'e9r\'e9sekn\'e9l a guard/middleware kivonja az Authorization fejl\'e9cb\'151l a Bearer tokent,\par
+ellen\'151rzi az al\'e1\'edr\'e1st \u00e9s a lej\'e1ratot, majd a dek\'f3dolt payloadot a request objektumba teszi. Ennek k\'f6sz\'f6nhet\'151en\par
+a kontrollerekben m\'e1r csak a jogosults\'e1gi logik\'e1ra kell koncentr\'e1lni. Ha a token hi\'e1nyzik vagy hib\'e1s, 401-es v\'e1lasz megy vissza.\par
+\par
+Gyakori hiba, hogy a middleware csak a token jelenl\'e9t\'e9t n\'e9zi, de az al\'e1\'edr\'e1st vagy az issuer/audience mez\'151ket nem ellen\'151rzi.\par
+\'c9rdemes egys\'e9ges hibaform\'e1tumot alkalmazni (errorCode, message, timestamp), hogy a frontend \u00e9s a monitoring\par
+rendszer egyar\'e1nt stabilan kezelje az auth hib\'e1kat.\par
+\b Kiemelt k\'f3dr\'e9szlet (mintak\'f3d):\b0\par
+{\f1\fs20
+function authGuard(req, res, next) {\par
+  const header = req.headers.authorization || '';\par
+  const token = header.startsWith('Bearer ') ? header.slice(7) : null;\par
+  if (!token) return res.status(401).json({ errorCode: 'AUTH_MISSING_TOKEN' });\par
+\par
+  try {\par
+    req.user = jwt.verify(token, ACCESS_SECRET, { issuer: 'buttercup-api' });\par
+    return next();\par
+  } catch (e) {\par
+    return res.status(401).json({ errorCode: 'AUTH_INVALID_TOKEN' });\par
+  }\par
+}\par
+}\fs24\f0
+\par
+\b 3) Funkci\'f3: Szerepk\'f6r alap\'fa jogosults\'e1gkezel\'e9s (RBAC)\b0\par
+\b Le\'edr\'e1s:\b0\par
+Az RBAC c\'e9lja, hogy ne csak az legyen eld\'f6ntve, ki van bel\'e9pve, hanem az is, hogy mit tehet.\par
+P\'e9ld\'e1ul term\'e9k l\'e9trehoz\'e1sa, t\'f6rl\'e9se vagy rendel\'e9s st\'e1tusz m\'f3dos\'edt\'e1sa tipikusan admin szerepk\'f6rh\'f6z k\'f6t\'f6tt,\par
+m\'edg list\'e1z\'e1s lehet publikus vagy sima user jogosults\'e1g\'fa.\par
+\par
+Aj\'e1nlott a jogosults\'e1gkezel\'e9st deklarat\'edv m\'f3don, dekor\'e1torokkal vagy route metadata-val kezelni,\par
+\'edgy a business logika tiszta marad.\'a0Audit szempontb\'f3l fontos napl\'f3zni az elutas\'edtott (403) h\'edv\'e1sokat is.\par
+\par
+\b 4) Funkci\'f3: Regisztr\'e1ci\'f3 \u00e9s jelsz\'f3kezel\'e9s\b0\par
+\b Le\'edr\'e1s:\b0\par
+Regisztr\'e1ci\'f3kor a bemen\'151 mez\'151k (email, jelsz\'f3, n\'e9v) valid\'e1l\'e1sa kulcsfontoss\'e1g\'fa. Az email form\'e1tum\par
+ellen\'151rz\'e9se mellett duplik\'e1ci\'f3-v\'e9delem kell (unique index), a jelsz\'f3t pedig soha nem szabad plain text form\'e1ban t\'e1rolni.\par
+Haszn\'e1lj bcrypt/argon2 hash-el\'e9st megfelel\'151 k\'f6lts\'e9gparam\'e9terrel.\par
+\par
+A hibav\'e1laszokat \u00e9rdemes \u00fagy kialak\'edtani, hogy ne sziv\'e1rogjon ki, pontosan melyik mez\'151 hib\'e1s biztons\'e1gi szempontb\'f3l.\par
+P\'e9ld\'e1ul bejelentkez\'e9sn\'e9l mindig ugyanazt a hib\'e1t add vissza (\'e9rv\'e9nytelen hiteles\'edt\'e9si adat),\par
+ne azt, hogy \"email l\'e9tezik, de rossz jelsz\'f3\".\par
+\par
+\b 5) Funkci\'f3: Term\'e9k CRUD \u00e9s admin m\'171veletek\b0\par
+\b Le\'edr\'e1s:\b0\par
+A term\'e9k modulban tipikus m\'171veletek: list\'e1z\'e1s, lek\'e9r\'e9s ID alapj\'e1n, l\'e9trehoz\'e1s, m\'f3dos\'edt\'e1s, t\'f6rl\'e9s.\par
+Frontend szempontb\'f3l hasznos a lapoz\'e1s, rendez\'e9s \u00e9s sz\'171r\'e9s, backend szempontb\'f3l pedig az adatkonzisztencia,\par
+valid\'e1ci\'f3 \u00e9s az \u00fctk\'f6z\'151 m\'f3dos\'edt\'e1sok kezel\'e9se.\par
+\par
+A publikus \u00e9s admin endpointok elv\'e1laszt\'e1sa seg\'edt, hogy a katal\'f3gus nyitott maradjon, mik\'f6zben az\par
+adatszerkeszt\'e9si jog kiz\'e1r\'f3lag megfelel\'151 jogosults\'e1ggal legyen el\'e9rhet\'151.\par
+\par
+\b 6) Funkci\'f3: Kos\'e1r \u00e9s rendel\'e9s folyamat\b0\par
+\b Le\'edr\'e1s:\b0\par
+A kos\'e1r modul feladata a t\'e9telek hozz\'e1ad\'e1sa, m\'f3dos\'edt\'e1sa, elt\'e1vol\'edt\'e1sa, valamint az \u00e1rak dinamikus \u00fajrasz\'e1m\'edt\'e1sa.\par
+A rendel\'e9s lead\'e1sakor tranzakci\'f3s m\'171k\'f6d\'e9s javasolt: k\'e9szletellen\'151rz\'e9s, rendel\'e9s ment\'e9s, fizet\'e9si rekord\par
+l\'e9trehoz\'e1s \u00e9s st\'e1tuszfriss\'edt\'e9s egy folyamatban.\par
+\par
+Hiba eset\'e9n a tranzakci\'f3 rollback-et ad, \'edgy nincs \"f\'e9lig mentett\" rendel\'e9s. A rendszerben \u00e9rdemes idempotens\par
+v\'e9gpontokat is haszn\'e1lni (pl. fizet\'e9si callback), hogy t\'f6bbsz\'f6r be\'e9rkez\'151 h\'edv\'e1s se okozzon duplik\'e1ci\'f3t.\par
+\par
+\b 7) Funkci\'f3: Hibakezel\'e9s \u00e9s egys\'e9ges API v\'e1lasz\b0\par
+\b Le\'edr\'e1s:\b0\par
+A k\'f6zponti hibakezel\'e9s c\'e9lja, hogy minden kiv\'e9tel konzisztens form\'e1ban menjen vissza: statusCode, errorCode,\par
+message, traceId, timestamp. Ez jelent\'151sen gyors\'edtja a hibakeres\'e9st, mert a frontend \u00e9s a backend napl\'f3k\par
+azonos szerkezetet haszn\'e1lnak.\par
+\par
+Termel\'e9si (production) k\'f6rnyezetben ne add vissza a teljes stack trace-t a kliensnek, csak bels\'151 logban t\'e1rold.\par
+Fejleszt\'151i m\'f3dban viszont ez hasznos lehet a gyors iter\'e1ci\'f3hoz.\par
+\par
+\b 8) Funkci\'f3: Adatb\'e1zis konfigur\'e1ci\'f3 \u00e9s modellez\'e9s\b0\par
+\b Le\'edr\'e1s:\b0\par
+Az adatb\'e1zis r\'e9tegben fontos a j\'f3 indexel\'e9s (email, slug, orderNumber), mert ez hat\'e1rozza meg a gyakori\par
+lek\'e9rdez\'e9sek sebess\'e9g\'e9t. A rel\'e1ci\'f3k (1-N, N-N) helyes modellez\'e9se k\'f6nny\'edti a riportol\'e1st \u00e9s a b\'151v\'edthet\'151s\'e9get.\par
+\par
+Migr\'e1ci\'f3k haszn\'e1lat\'e1val reproduk\'e1lhat\'f3v\'e1 v\'e1lik a schema minden k\'f6rnyezetben. Javasolt minden schema-v\'e1ltoz\'e1shoz\par
+kül\'f6n migr\'e1ci\'f3 \u00e9s rollback terv k\'e9sz\'edt\'e9se.\par
+\par
+\b 9) Funkci\'f3: Napl\'f3z\'e1s \u00e9s audit\b0\par
+\b Le\'edr\'e1s:\b0\par
+K\'fcl\'f6n kezeld az alkalmaz\'e1s hibalogot \u00e9s az audit esem\'e9nyeket. Hibalogba menjen a technikai probl\'e9ma (exception),\par
+auditba pedig az \u00fczleti esem\'e9ny (ki m\'f3dos\'edtott term\'e9ket, mikor, milyen endpointon).\par
+\par
+A traceId/correlationId bevezet\'e9se seg\'edt \u00f6sszek\'f6tni a frontend k\'e9r\'e9st a backend logokkal,\par
+mikroszerviz vagy t\'f6bbr\'e9teg\'171 architekt\'fara eset\'e9n ez gyakorlatilag k\'f6telez\'151.
+\b 10) Funkci\'f3: Biztons\'e1gi hardening (rate-limit, CORS, sanitization)\b0\par
+\b Le\'edr\'e1s:\b0\par
+A rate limiting cs\'f6kkenti a brute force kock\'e1zatot, a szigor\'fa CORS policy pedig megakad\'e1lyozza, hogy idegen originr\'151l\par
+k\'f6nnyen h\'edvhat\'f3 legyen a v\'e9dett API. Input sanitization \u00e9s s\'e9ma valid\'e1ci\'f3 kell minden bej\'f6v\'151 adatra\par
+(XSS, NoSQL/SQL injection ellen).\par
+\par
+Aj\'e1nlott tov\'e1bb\'e1 security headerek haszn\'e1lata (helmet), HTTPS k\'e9nyszer\'edt\'e9se, \u00e9s titokkezel\'e9s environment\par
+v\'e1ltoz\'f3kkal vagy secret managerrel.\par
+\par
+\b Kit\'f6lt\'e9si minta (minden funkci\'f3hoz)\b0\par
+- Funkci\'f3 neve\par
+- F\'e1jlok pontos el\'e9r\'e9si \u00fatja\par
+- 10\u8211?30 soros relev\'e1ns k\'f3dr\'e9szlet\par
+- 1\u8211?2 bekezd\'e9ses m\'171szaki magyar\'e1zat (input/output, edge case, hiba\'e1gak)\par
+- Biztons\'e1gi \u00e9s teljes\'edtm\'e9ny megjegyz\'e9s\par
+=======
 \b Buttercup Perfumery backend elemz\'e9s \u8211? Word dokumentum v\'e1zlat\b0\par
 \par
 \b Megjegyz\'e9s az adatforr\'e1sr\'f3l\b0\par
@@ -66,5 +204,5 @@ HTTP security headerek (pl. Helmet).\par
 \par
 \b K\'f6vetkez\'151 l\'e9p\'e9s\b0\par
 Ha fel tudod t\'f6lteni a projektet ide (vagy egy zipet), akkor ezt a dokumentumot konkr\'e9t, \par
-f\'e1jlokra \u00e9s val\'f3di k\'f3dr\'e9szletekre szabott, teljes v\'e9gleges verzi\'f3ra cser\'e9lem.\par
+f\'e1jlokra \u00e9s val\'f3di k\'f3dr\'e9szletekre szabott, teljes v\'e9gleges verzi\'f3ra cser\'e9lem.\par main
 }
